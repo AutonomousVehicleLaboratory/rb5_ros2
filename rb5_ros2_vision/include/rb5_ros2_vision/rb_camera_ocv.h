@@ -16,13 +16,7 @@
 class RbCamera : public rclcpp::Node
 {
   public:
-    RbCamera(const std::string & name)
-      : Node(name, rclcpp::NodeOptions().use_intra_process_comms(true);
-    ~RbCamera();
-    GstFlowReturn processData(GstElement * sink, RbCamera::CustomData * data);
-
-    rclcpp::Publisher<std_msgs::msg::Image>::SharedPtr pub_;
-
+    
     // data
     typedef struct _CustomData
     {
@@ -35,6 +29,12 @@ class RbCamera : public rclcpp::Node
     } CustomData;
 
     void init();
+    
+    RbCamera(const std::string & name);
+    ~RbCamera();
+    static GstFlowReturn processData(GstElement * sink, RbCamera* node);
+
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr pub_;
 
     GstMessage *msg;
     GstBus *bus;
