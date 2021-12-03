@@ -17,6 +17,12 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -56,10 +62,10 @@ ament_target_dependencies(rb_camera_ocv_node
   "std_msgs"
   "OpenCV")
 
-message(${PROJECT_NAME})
 target_link_libraries(rb_camera_ocv_node ${GST_APP_LIBRARIES} ${GST_VIDEO_LIBRARIES})
 
 target_link_libraries(rb_camera_ocv_node ${CMAKE_SOURCE_DIR}/libfastcv.a -pthread -ldl -ljpeg) 
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -71,5 +77,13 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+
+install(TARGETS
+  rb_camera_ocv_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
 
 ament_package()

@@ -1,0 +1,7 @@
+rb_camera_ocv_node:
+    ros__parameters:
+        camera_id: 2
+        width: 640
+        height: 480
+        input_format: "YUY2"
+        topic_name: "camera_2"

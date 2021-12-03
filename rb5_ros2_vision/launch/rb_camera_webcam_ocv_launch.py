@@ -15,25 +15,25 @@ def generate_launch_description():
 
     # args that can be set from the command line or a default will be used
     camera_id = DeclareLaunchArgument(
-        "camera_id", default_value=TextSubstitution(text="0")
+        "camera_id", default_value=TextSubstitution(text="2")
     )
     frame_rate = DeclareLaunchArgument(
         "frame_rate", default_value=TextSubstitution(text="30")
     )
     width = DeclareLaunchArgument(
-        "width", default_value=TextSubstitution(text="1920")
+        "width", default_value=TextSubstitution(text="640")
     )
     height = DeclareLaunchArgument(
-        "height", default_value=TextSubstitution(text="1080")
+        "height", default_value=TextSubstitution(text="480")
     )
     input_format = DeclareLaunchArgument(
-        "input_format", default_value=TextSubstitution(text="NV12")
+        "input_format", default_value=TextSubstitution(text="YUY2")
     )
     output_format = DeclareLaunchArgument(
         "output_format", default_value=TextSubstitution(text="RGB")
     )
     topic_name = DeclareLaunchArgument(
-        "topic_name", default_value=TextSubstitution(text="camera_0")
+        "topic_name", default_value=TextSubstitution(text="camera_2")
     )
     image_compress = DeclareLaunchArgument(
         "image_compress", default_value=TextSubstitution(text="false")
@@ -44,7 +44,7 @@ def generate_launch_description():
     rb_camera_main_ocv_node = Node(
             package='rb5_ros2_vision',
             node_executable='rb_camera_ocv_node',
-            name='rb_camera_main_ocv',
+            name='rb_camera_webcam_ocv',
             parameters=[{
                 "camera_id": LaunchConfiguration('camera_id'),
                 "frame_rate": LaunchConfiguration('frame_rate'),

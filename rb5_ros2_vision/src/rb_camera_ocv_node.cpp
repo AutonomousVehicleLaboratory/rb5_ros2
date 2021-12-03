@@ -13,23 +13,23 @@ RbCamera::RbCamera(const std::string & name)
   rclcpp::Parameter _topic_name;
   rclcpp::Parameter _image_compress;
 
-  this->declare_parameter<int>("camera_id", 0);
+  this->declare_parameter<int>("camera_id", 2);
   this->declare_parameter<int>("frame_rate", 30);
-  this->declare_parameter<int>("width", 1920);
-  this->declare_parameter<int>("height", 1080);
-  this->declare_parameter<std::string>("input_format", "NV12");
+  this->declare_parameter<int>("width", 640);
+  this->declare_parameter<int>("height", 480);
+  this->declare_parameter<std::string>("input_format", "YUY2");
   this->declare_parameter<std::string>("output_format", "RGB");
-  this->declare_parameter<std::string>("topic_name", "camera_0");
+  this->declare_parameter<std::string>("topic_name", "camera_2");
   this->declare_parameter<bool>("image_compress", false);
 
   this->get_parameter("camera_id", _camera_id);
-  RCLCPP_INFO(this->get_logger(), "camera_id: %d", _camera_id);
+  RCLCPP_INFO(this->get_logger(), "camera_id: %s", _camera_id.value_to_string().c_str());
   this->get_parameter("frame_rate", _frame_rate);
-  RCLCPP_INFO(this->get_logger(), "frame_rate: %d", _frame_rate);
+  RCLCPP_INFO(this->get_logger(), "frame_rate: %s", _frame_rate.value_to_string().c_str());
   this->get_parameter("width", _width);
-  RCLCPP_INFO(this->get_logger(), "width: %d", _width);
+  RCLCPP_INFO(this->get_logger(), "width: %s", _width.value_to_string().c_str());
   this->get_parameter("height", _height);
-  RCLCPP_INFO(this->get_logger(), "height: %d", _height);
+  RCLCPP_INFO(this->get_logger(), "height: %s", _height.value_to_string().c_str());
   this->get_parameter("input_format", _input_format);
   RCLCPP_INFO(this->get_logger(), "input_format: %s", _input_format.as_string().c_str());
   this->get_parameter("output_format", _output_format);
@@ -37,7 +37,7 @@ RbCamera::RbCamera(const std::string & name)
   this->get_parameter("topic_name", _topic_name);
   RCLCPP_INFO(this->get_logger(), "topic_name: %s", _topic_name.as_string().c_str());
   this->get_parameter("image_compress", _image_compress);
-  RCLCPP_INFO(this->get_logger(), "image_compress: %d", _image_compress);  
+  RCLCPP_INFO(this->get_logger(), "image_compress: %s", _image_compress.value_to_string().c_str());  
   // timer_ = this->create_wall_timer(
   //     1000ms, std::bind(&RbCamera::respond, this));
 
@@ -117,7 +117,9 @@ RbCamera::~RbCamera(){
 
 void RbCamera::init(){
   g_object_set(data.appsink, "emit-signals", TRUE, nullptr);
-  g_object_set(G_OBJECT(data.source), "camera", camera_id, NULL);
+  if (camera_id < 2) {
+    g_object_set(G_OBJECT(data.source), "camera", camera_id, NULL);
+  }
   g_signal_connect(data.appsink, "new-sample", G_CALLBACK(this->processData), this);
 
   // play
@@ -188,7 +190,7 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
         g_print("no dimensions");
     }
 
-    // g_print("%s\n", gst_structure_to_string(caps_structure));
+    g_print("%s\n", gst_structure_to_string(caps_structure));
 
     if (!gst_buffer_map ((buffer), &map_info, GST_MAP_READ)) {
       gst_buffer_unmap ((buffer), &map_info);
