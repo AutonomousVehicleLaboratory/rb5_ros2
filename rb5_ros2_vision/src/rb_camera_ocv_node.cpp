@@ -4,6 +4,7 @@
 RbCamera::RbCamera(const std::string & name)
   : Node(name, rclcpp::NodeOptions().use_intra_process_comms(true))
 {
+  // Handle parameters
   rclcpp::Parameter _camera_id;
   rclcpp::Parameter _frame_rate;
   rclcpp::Parameter _width;
@@ -38,9 +39,8 @@ RbCamera::RbCamera(const std::string & name)
   RCLCPP_INFO(this->get_logger(), "topic_name: %s", _topic_name.as_string().c_str());
   this->get_parameter("image_compress", _image_compress);
   RCLCPP_INFO(this->get_logger(), "image_compress: %s", _image_compress.value_to_string().c_str());  
-  // timer_ = this->create_wall_timer(
-  //     1000ms, std::bind(&RbCamera::respond, this));
 
+  // convert parameter type
   camera_id = _camera_id.as_int();
   width = _width.as_int();
   height = _height.as_int();
@@ -54,6 +54,7 @@ RbCamera::RbCamera(const std::string & name)
   pub_ = this->create_publisher<sensor_msgs::msg::Image>(topic_name, 10);
   std::weak_ptr<std::remove_pointer<decltype(pub_.get())>::type> captured_pub = pub_;
 
+  // Gstreamer pipeline definition and setup.
   gst_init(0, nullptr);
 
   std::string input_caps = "video/x-raw,format=" + input_format + 
@@ -105,15 +106,13 @@ RbCamera::RbCamera(const std::string & name)
 
 }
 
-// RbCamera::respond(){
-
-// }
 
 RbCamera::~RbCamera(){
   gst_object_unref(bus);
   gst_element_set_state(data.pipeline, GST_STATE_NULL);
   gst_object_unref(data.pipeline);
 }
+
 
 void RbCamera::init(){
   g_object_set(data.appsink, "emit-signals", TRUE, nullptr);
@@ -165,7 +164,8 @@ void RbCamera::init(){
 }
 
 
-/* Callback for appsink to parse the video stream and publish images. */
+/* Callback for appsink to parse the video stream and publish images. 
+static function as it will be cast as a C CALLBACK function.*/
 GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
 
   GstSample *sample;
@@ -190,7 +190,7 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
         g_print("no dimensions");
     }
 
-    g_print("%s\n", gst_structure_to_string(caps_structure));
+    // g_print("%s\n", gst_structure_to_string(caps_structure)); // print streaming format
 
     if (!gst_buffer_map ((buffer), &map_info, GST_MAP_READ)) {
       gst_buffer_unmap ((buffer), &map_info);
@@ -199,6 +199,7 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
       return GST_FLOW_ERROR;
     }
 
+    // print system time to show the streaming frequency.
     timeval current_time;
     gettimeofday(&current_time, 0);
     std::cout << current_time.tv_sec << "." << current_time.tv_usec << std::endl;
@@ -207,17 +208,6 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
     // cv::Mat frame_rgb = cv::Mat::zeros(width, height, CV_8UC3);
     cv::Mat frame_rgb(cv::Size(width, height), CV_8UC3, (char*)map_info.data, cv::Mat::AUTO_STEP);
     // cv::cvtColor(frame_rgb, frame, cv::COLOR_RGB2);
-
-    // Prepare ROS message.
-    cv_bridge::CvImage bridge;
-
-    // Publish camera image
-    // sensor_msgs::msg::Image cam_msg;
-    // std_msgs::msg::Header header;
-    // header.stamp = node->now();
-    // bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::RGB8, frame_rgb);
-    // bridge.toImageMsg(cam_msg);
-    // node->pub_->publish(cam_msg);
 
     // Pack the OpenCV image into the ROS image.
     sensor_msgs::msg::Image::UniquePtr cam_msg(new sensor_msgs::msg::Image());
@@ -230,8 +220,6 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
     cam_msg->step = static_cast<sensor_msgs::msg::Image::_step_type>(frame_rgb.step);
     cam_msg->data.assign(frame_rgb.datastart, frame_rgb.dataend);
     node->pub_->publish(std::move(cam_msg));  // Publish.
-    
-    // std::cout << cv::getBuildInformation() << std::endl;
     
     /*
     // Publish camera frame 
@@ -247,25 +235,6 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
       // cv::Mat frame_bgr = cv::Mat::zeros(width, height, CV_8UC3);
       // cv::cvtColor(frame_rgb, frame_bgr, cv::COLOR_RGB2BGR);
       // cv::imencode(".jpg", frame_bgr, cam_compress_msg.data, p);
-
-      // cvbridge compression (using cv::imencode internally)
-      // bridge.toCompressedImageMsg(cam_compress_msg);
-
-      // libjpeg-turbo compression https://stackoverflow.com/a/17671012
-      const int JPEG_QUALITY = 90;
-      const int COLOR_COMPONENTS = 3;
-      long unsigned int _jpegSize = 0;
-      unsigned char* _compressedImage = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
-      // unsigned char buffer[width*height*COLOR_COMPONENTS]; //!< Contains the uncompressed image
-
-      tjhandle _jpegCompressor = tjInitCompress();
-
-      tjCompress2(_jpegCompressor, frame_rgb.data, width, 0, height, TJPF_RGB,
-                  &_compressedImage, &_jpegSize, TJSAMP_444, JPEG_QUALITY,
-                  TJFLAG_FASTDCT);
-
-      std::vector<unsigned char> vec(_compressedImage, _compressedImage + _jpegSize);
-      cam_compress_msg.data = vec;
 
       cam_compress_pub.publish(cam_compress_msg);
     }
