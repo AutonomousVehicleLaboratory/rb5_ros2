@@ -13,13 +13,13 @@ RbCamera::RbCamera(const std::string & name)
   rclcpp::Parameter _topic_name;
   rclcpp::Parameter _image_compress;
 
-  this->declare_parameter<int>("camera_id", 2);
+  this->declare_parameter<int>("camera_id", 0);
   this->declare_parameter<int>("frame_rate", 30);
-  this->declare_parameter<int>("width", 640);
-  this->declare_parameter<int>("height", 480);
-  this->declare_parameter<std::string>("input_format", "YUY2");
+  this->declare_parameter<int>("width", 1920);
+  this->declare_parameter<int>("height", 1080);
+  this->declare_parameter<std::string>("input_format", "NV12");
   this->declare_parameter<std::string>("output_format", "RGB");
-  this->declare_parameter<std::string>("topic_name", "camera_2");
+  this->declare_parameter<std::string>("topic_name", "camera_0");
   this->declare_parameter<bool>("image_compress", false);
 
   this->get_parameter("camera_id", _camera_id);
