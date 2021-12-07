@@ -1,5 +1,4 @@
 #include "rb_camera_ocv.h"
-#include <sys/time.h>
 
 RbCamera::RbCamera(const std::string & name)
   : Node(name, rclcpp::NodeOptions().use_intra_process_comms(true))
@@ -42,7 +41,7 @@ void RbCamera::getROSParams(){
   this->declare_parameter<std::string>("topic_name", "camera_0");
   this->declare_parameter<bool>("image_compress", false);
   this->declare_parameter<bool>("image_rectify", false);
-  this->declare_parameter<std::string>("camera_parameter_path", "/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml")
+  this->declare_parameter<std::string>("camera_parameter_path", "/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml");
 
   this->get_parameter("use_rb_cam", _use_rb_cam);
   RCLCPP_INFO(this->get_logger(), "use_rb_cam: %s", _use_rb_cam.value_to_string().c_str());
@@ -62,6 +61,8 @@ void RbCamera::getROSParams(){
   RCLCPP_INFO(this->get_logger(), "topic_name: %s", _topic_name.as_string().c_str());
   this->get_parameter("image_compress", _image_compress);
   RCLCPP_INFO(this->get_logger(), "image_compress: %s", _image_compress.value_to_string().c_str());
+  this->get_parameter("image_rectify", _image_rectify);
+  RCLCPP_INFO(this->get_logger(), "image_rectify: %s", _image_rectify.value_to_string().c_str());
   this->get_parameter("camera_parameter_path", _camera_parameter_path);
   RCLCPP_INFO(this->get_logger(), "camera_parameter_path", _camera_parameter_path.value_to_string().c_str());
 
@@ -253,8 +254,6 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
     // cv::Mat frame_rgb = cv::Mat::zeros(width, height, CV_8UC3);
     cv::Mat frame_rgb(cv::Size(width, height), CV_8UC3, (char*)map_info.data, cv::Mat::AUTO_STEP);
     // cv::cvtColor(frame_rgb, frame, cv::COLOR_RGB2);
-
-    node->image_rectify = true;
 
     if (node->image_rectify){ 
       Mat frame_rgb_rect;

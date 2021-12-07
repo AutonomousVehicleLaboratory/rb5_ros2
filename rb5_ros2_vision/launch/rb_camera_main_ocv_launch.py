@@ -54,6 +54,7 @@ def generate_launch_description():
             package='rb5_ros2_vision',
             node_executable='rb_camera_ocv_node',
             name='rb_camera_main_ocv',
+            output='screen',
             parameters=[{
                 "use_rb_cam": LaunchConfiguration('use_rb_cam'),
                 "camera_id": LaunchConfiguration('camera_id'),

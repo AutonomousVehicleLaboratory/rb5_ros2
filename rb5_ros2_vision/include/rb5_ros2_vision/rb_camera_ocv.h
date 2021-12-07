@@ -11,6 +11,7 @@
 #include "sensor_msgs/msg/compressed_image.hpp"
 #include <string>
 #include <cstring>
+#include <sys/time.h>
 
 #include "camera_parameter.h"
 
@@ -33,7 +34,7 @@ class RbCamera : public rclcpp::Node
     
     RbCamera(const std::string & name);
     ~RbCamera();
-    void getROSParam();
+    void getROSParams();
     void prepareRemap();
     void buildGStreamerPipeline();
     void startGStreamerPipeline();
@@ -57,6 +58,7 @@ class RbCamera : public rclcpp::Node
     std::string input_format;
     std::string output_format;
     std::string topic_name;
+    std::string camera_parameter_path;
 
     CameraParameter cam_param;
     Mat map1;
