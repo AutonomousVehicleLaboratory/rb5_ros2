@@ -4,7 +4,23 @@
 RbCamera::RbCamera(const std::string & name)
   : Node(name, rclcpp::NodeOptions().use_intra_process_comms(true))
 {
+  getROSParams();
+
+  // Create a publisher on the output topic.
+  pub_ = this->create_publisher<sensor_msgs::msg::Image>(topic_name, 10);
+  std::weak_ptr<std::remove_pointer<decltype(pub_.get())>::type> captured_pub = pub_;
+
+  if (image_rectify) {
+    prepareRemap();
+  }
+
+  buildGStreamerPipeline();
+
+}
+
+void RbCamera::getROSParams(){
   // Handle parameters
+  rclcpp::Parameter _use_rb_cam;
   rclcpp::Parameter _camera_id;
   rclcpp::Parameter _frame_rate;
   rclcpp::Parameter _width;
@@ -13,7 +29,10 @@ RbCamera::RbCamera(const std::string & name)
   rclcpp::Parameter _output_format;
   rclcpp::Parameter _topic_name;
   rclcpp::Parameter _image_compress;
+  rclcpp::Parameter _image_rectify;
+  rclcpp::Parameter _camera_parameter_path;
 
+  this->declare_parameter<bool>("use_rb_cam", true);
   this->declare_parameter<int>("camera_id", 0);
   this->declare_parameter<int>("frame_rate", 30);
   this->declare_parameter<int>("width", 1920);
@@ -22,7 +41,11 @@ RbCamera::RbCamera(const std::string & name)
   this->declare_parameter<std::string>("output_format", "RGB");
   this->declare_parameter<std::string>("topic_name", "camera_0");
   this->declare_parameter<bool>("image_compress", false);
+  this->declare_parameter<bool>("image_rectify", false);
+  this->declare_parameter<std::string>("camera_parameter_path", "/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml")
 
+  this->get_parameter("use_rb_cam", _use_rb_cam);
+  RCLCPP_INFO(this->get_logger(), "use_rb_cam: %s", _use_rb_cam.value_to_string().c_str());
   this->get_parameter("camera_id", _camera_id);
   RCLCPP_INFO(this->get_logger(), "camera_id: %s", _camera_id.value_to_string().c_str());
   this->get_parameter("frame_rate", _frame_rate);
@@ -38,9 +61,12 @@ RbCamera::RbCamera(const std::string & name)
   this->get_parameter("topic_name", _topic_name);
   RCLCPP_INFO(this->get_logger(), "topic_name: %s", _topic_name.as_string().c_str());
   this->get_parameter("image_compress", _image_compress);
-  RCLCPP_INFO(this->get_logger(), "image_compress: %s", _image_compress.value_to_string().c_str());  
+  RCLCPP_INFO(this->get_logger(), "image_compress: %s", _image_compress.value_to_string().c_str());
+  this->get_parameter("camera_parameter_path", _camera_parameter_path);
+  RCLCPP_INFO(this->get_logger(), "camera_parameter_path", _camera_parameter_path.value_to_string().c_str());
 
   // convert parameter type
+  use_rb_cam = _use_rb_cam.as_bool();
   camera_id = _camera_id.as_int();
   width = _width.as_int();
   height = _height.as_int();
@@ -49,18 +75,18 @@ RbCamera::RbCamera(const std::string & name)
   output_format = _output_format.as_string();
   topic_name = _topic_name.as_string();
   image_compress = _image_compress.as_bool();
+  image_rectify = _image_rectify.as_bool();
+  camera_parameter_path = _camera_parameter_path.as_string();
+}
 
-  // Create a publisher on the output topic.
-  pub_ = this->create_publisher<sensor_msgs::msg::Image>(topic_name, 10);
-  std::weak_ptr<std::remove_pointer<decltype(pub_.get())>::type> captured_pub = pub_;
 
-  const string inputSettingsFile = "/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml";
-  std::cout << "input file name: " << inputSettingsFile << std::endl;
-  FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
+// Prepare the maps for camera undistortion
+void RbCamera::prepareRemap(){
+  FileStorage fs(camera_parameter_path, FileStorage::READ); // Read the settings
   if (!fs.isOpened())
   {
-      cout << "Could not open the configuration file: \"" << inputSettingsFile << "\"" << endl;
-      return;
+      cout << "Could not open the configuration file: \"" << camera_parameter_path << "\"" << endl;
+      exit(0);
   }
 
   cam_param.read(fs);
@@ -76,8 +102,18 @@ RbCamera::RbCamera(const std::string & name)
     cameraMatrix, distCoeffs, Mat(),
     getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 0, imageSize, 0), imageSize,
     CV_16SC2, map1, map2);
+}
 
-  // Gstreamer pipeline definition and setup.
+
+RbCamera::~RbCamera(){
+  gst_object_unref(bus);
+  gst_element_set_state(data.pipeline, GST_STATE_NULL);
+  gst_object_unref(data.pipeline);
+}
+
+
+// Gstreamer pipeline definition and setup.
+void RbCamera::buildGStreamerPipeline(){
   gst_init(0, nullptr);
 
   std::string input_caps = "video/x-raw,format=" + input_format + 
@@ -90,7 +126,7 @@ RbCamera::RbCamera(const std::string & name)
   std::cout << "input caps: " << input_caps << std::endl;
   std::cout << "output caps: " << output_caps << std::endl;
 
-  if (camera_id == 0 or camera_id == 1) {
+  if (use_rb_cam) {
     data.source        = gst_element_factory_make("qtiqmmfsrc", "source");
   }
   else {
@@ -117,33 +153,19 @@ RbCamera::RbCamera(const std::string & name)
     return;
   }
 
-  if (camera_id == 0 or camera_id == 1) {
+  if (use_rb_cam) {
     g_object_set (G_OBJECT(data.source), "camera", camera_id, nullptr);
   }
-
   g_object_set(G_OBJECT(data.capsfiltersrc), "caps",
                gst_caps_from_string(input_caps.c_str()), nullptr);
   g_object_set(G_OBJECT(data.capsfilterapp), "caps",
 		           gst_caps_from_string(output_caps.c_str()), nullptr);
-
-
-}
-
-
-RbCamera::~RbCamera(){
-  gst_object_unref(bus);
-  gst_element_set_state(data.pipeline, GST_STATE_NULL);
-  gst_object_unref(data.pipeline);
-}
-
-
-void RbCamera::init(){
   g_object_set(data.appsink, "emit-signals", TRUE, nullptr);
-  if (camera_id < 2) {
-    g_object_set(G_OBJECT(data.source), "camera", camera_id, NULL);
-  }
   g_signal_connect(data.appsink, "new-sample", G_CALLBACK(this->processData), this);
+}
 
+
+void RbCamera::startGStreamerPipeline(){
   // play
   ret = gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
   if(ret == GST_STATE_CHANGE_FAILURE){
@@ -285,6 +307,6 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
 int main(int argc, char *argv[]){
   rclcpp::init(argc, argv);
   auto node = std::make_shared<RbCamera>("rb_camera");
-  node->init();
+  node->startGStreamerPipeline();
 }
 

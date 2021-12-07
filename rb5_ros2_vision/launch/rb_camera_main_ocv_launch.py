@@ -14,6 +14,9 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     # args that can be set from the command line or a default will be used
+    use_rb_cam = DeclareLaunchArgument(
+        "use_rb_cam", default_value=TextSubstitution(text="true")
+    )
     camera_id = DeclareLaunchArgument(
         "camera_id", default_value=TextSubstitution(text="0")
     )
@@ -38,6 +41,12 @@ def generate_launch_description():
     image_compress = DeclareLaunchArgument(
         "image_compress", default_value=TextSubstitution(text="false")
     )
+    image_rectify = DeclareLaunchArgument(
+        "image_rectify", default_value=TextSubstitution(text="false")
+    )
+    camera_parameter_path = DeclareLaunchArgument(
+        "camera_parameter_path", default_value=TextSubstitution(text="/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml")
+    )
 
     # start another turtlesim_node in the turtlesim2 namespace
     # and use args to set parameters
@@ -46,6 +55,7 @@ def generate_launch_description():
             node_executable='rb_camera_ocv_node',
             name='rb_camera_main_ocv',
             parameters=[{
+                "use_rb_cam": LaunchConfiguration('use_rb_cam'),
                 "camera_id": LaunchConfiguration('camera_id'),
                 "frame_rate": LaunchConfiguration('frame_rate'),
                 "width": LaunchConfiguration('width'),
@@ -54,10 +64,13 @@ def generate_launch_description():
                 "output_format": LaunchConfiguration('output_format'),
                 "topic_name": LaunchConfiguration('topic_name'),
                 "image_compress": LaunchConfiguration('image_compress'),
+                "image_rectify": LaunchConfiguration('image_rectify'),
+                "camera_parameter_path": LaunchConfiguration("camera_parameter_path")
             }]
         )
 
     return LaunchDescription([
+        use_rb_cam,
         camera_id,
         frame_rate,
         width,
@@ -66,5 +79,7 @@ def generate_launch_description():
         output_format,
         topic_name,
         image_compress,
+        image_rectify,
+        camera_parameter_path,
         rb_camera_main_ocv_node
     ])

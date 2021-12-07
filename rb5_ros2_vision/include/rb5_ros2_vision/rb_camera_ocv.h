@@ -33,6 +33,10 @@ class RbCamera : public rclcpp::Node
     
     RbCamera(const std::string & name);
     ~RbCamera();
+    void getROSParam();
+    void prepareRemap();
+    void buildGStreamerPipeline();
+    void startGStreamerPipeline();
     static GstFlowReturn processData(GstElement * sink, RbCamera* node);
 
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr pub_;
@@ -46,6 +50,7 @@ class RbCamera : public rclcpp::Node
     int width;
     int height;
     int frame_rate;
+    bool use_rb_cam; // use qtiqmmfsrc for rb cameras
     bool image_compress;
     bool image_rectify;
 
