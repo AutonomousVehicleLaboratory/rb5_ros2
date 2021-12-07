@@ -54,14 +54,13 @@ RbCamera::RbCamera(const std::string & name)
   pub_ = this->create_publisher<sensor_msgs::msg::Image>(topic_name, 10);
   std::weak_ptr<std::remove_pointer<decltype(pub_.get())>::type> captured_pub = pub_;
 
-  const string inputSettingsFile = "/home/henry/Documents/projects/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml"
+  const string inputSettingsFile = "/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml";
   std::cout << "input file name: " << inputSettingsFile << std::endl;
   FileStorage fs(inputSettingsFile, FileStorage::READ); // Read the settings
   if (!fs.isOpened())
   {
       cout << "Could not open the configuration file: \"" << inputSettingsFile << "\"" << endl;
-      parser.printMessage();
-      return -1;
+      return;
   }
 
   cam_param.read(fs);
@@ -72,8 +71,6 @@ RbCamera::RbCamera(const std::string & name)
   Size imageSize;
   imageSize.width = cam_param.image_width;
   imageSize.height = cam_param.image_height;
-
-  Mat map1, map2;
 
   initUndistortRectifyMap(
     cameraMatrix, distCoeffs, Mat(),
@@ -235,11 +232,11 @@ GstFlowReturn RbCamera::processData(GstElement * sink, RbCamera* node){
     cv::Mat frame_rgb(cv::Size(width, height), CV_8UC3, (char*)map_info.data, cv::Mat::AUTO_STEP);
     // cv::cvtColor(frame_rgb, frame, cv::COLOR_RGB2);
 
-    image_rectify = true;
+    node->image_rectify = true;
 
-    if (image_rectify){ 
+    if (node->image_rectify){ 
       Mat frame_rgb_rect;
-      remap(frame_rgb, frame_rgb_rect, map1, map2, INTER_LINEAR);
+      remap(frame_rgb, frame_rgb_rect, node->map1, node->map2, INTER_LINEAR);
       frame_rgb = frame_rgb_rect;
     }
 

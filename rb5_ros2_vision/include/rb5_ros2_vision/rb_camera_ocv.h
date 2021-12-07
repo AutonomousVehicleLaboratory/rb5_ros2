@@ -11,7 +11,6 @@
 #include "sensor_msgs/msg/compressed_image.hpp"
 #include <string>
 #include <cstring>
-#include <turbojpeg.h>
 
 #include "camera_parameter.h"
 
