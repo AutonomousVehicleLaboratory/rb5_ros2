@@ -42,26 +42,44 @@ def parse_calibration_yaml(yaml_path):
 
 def undistort_slow(img_list, mtx, dist, w, h, newcameramtx, roi):
     img_list_undist = []
-
+    x, y, w, h = roi
+    
     for img in img_list:
         img_undist = cv2.undistort(img, mtx, dist, None, newcameramtx)
+        
+        # crop the image    
+        img_undist = img_undist[y:y+h, x:x+w]
+        
         img_list_undist.append(img_undist)
+    
+
     
     return img_list_undist
 
 
 def undistort_fast(img_list, mtx, dist, w, h, newcameramtx, roi):
     img_list_undist = []
+    x, y, w, h = roi
     mapx, mapy = cv2.initUndistortRectifyMap(mtx, dist, None, newcameramtx, (w,h), 5)
 
     for img in img_list:
         img_undist = cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR)
+        
+        # crop the image    
+        img_undist = img_undist[y:y+h, x:x+w]
+        
         img_list_undist.append(img_undist)
     
     return img_list_undist
 
 
+def display_image_list(img_list):
+    for img in img_list:
+        cv2.imshow('image', img)
+        cv2.waitKey(0)
+
 def main():
+    print(cv2.getBuildInformation())
     img_dir = "/home/henry/Documents/data/000-calibration"
     yaml_path = osp.join(img_dir, "ost.yaml")
     img_list = read_image_from_dir(img_dir)
@@ -81,6 +99,8 @@ def main():
     start = timer()
     img_list_undist_fast = undistort_fast(img_list, mtx, dist, w, h, newcameramtx, roi)
     print("fast: ", timer() - start)
+
+    display_image_list(img_list_undist_fast)
 
 
 main()

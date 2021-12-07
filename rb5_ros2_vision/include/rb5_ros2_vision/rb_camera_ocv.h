@@ -13,6 +13,8 @@
 #include <cstring>
 #include <turbojpeg.h>
 
+#include "camera_parameter.h"
+
 class RbCamera : public rclcpp::Node
 {
   public:
@@ -46,10 +48,15 @@ class RbCamera : public rclcpp::Node
     int height;
     int frame_rate;
     bool image_compress;
+    bool image_rectify;
 
     std::string input_format;
     std::string output_format;
     std::string topic_name;
+
+    CameraParameter cam_param;
+    Mat map1;
+    Mat map2;
 
     CustomData data;
 };
