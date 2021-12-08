@@ -45,7 +45,7 @@ def generate_launch_description():
         "image_rectify", default_value=TextSubstitution(text="false")
     )
     camera_parameter_path = DeclareLaunchArgument(
-        "camera_parameter_path", default_value=TextSubstitution(text="/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml")
+        "camera_parameter_path", default_value=TextSubstitution(text="/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_main.yaml")
     )
 
     # start another turtlesim_node in the turtlesim2 namespace
