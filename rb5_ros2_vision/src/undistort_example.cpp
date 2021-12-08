@@ -188,12 +188,13 @@ int main(int argc, char* argv[])
 
         for(size_t i = 0; i < imageReadList.size(); i++ )
         {
-            // remap(imageReadList[i], rview, map1, map2, INTER_LINEAR);
-            undistort(imageReadList[i], rview, cameraMatrix, distCoeffs);
-            // imshow("Image View", rview);
-            // char c = (char)waitKey();
-            // if( c  == ESC_KEY || c == 'q' || c == 'Q' )
-            //     break;
+            remap(imageReadList[i], rview, map1, map2, INTER_LINEAR);
+            // undistort(imageReadList[i], rview, cameraMatrix, distCoeffs);
+            namedWindow("Image", WINDOW_GUI_NORMAL);
+            imshow("Image", rview);
+            char c = (char)waitKey();
+            if( c  == ESC_KEY || c == 'q' || c == 'Q' )
+                break;
 
         }
 

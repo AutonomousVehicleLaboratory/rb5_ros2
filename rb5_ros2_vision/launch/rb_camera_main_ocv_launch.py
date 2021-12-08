@@ -36,7 +36,7 @@ def generate_launch_description():
         "output_format", default_value=TextSubstitution(text="RGB")
     )
     topic_name = DeclareLaunchArgument(
-        "topic_name", default_value=TextSubstitution(text="camera_0")
+        "topic_name", default_value=['camera_', LaunchConfiguration('camera_id')]
     )
     image_compress = DeclareLaunchArgument(
         "image_compress", default_value=TextSubstitution(text="false")

@@ -36,7 +36,7 @@ def generate_launch_description():
         "output_format", default_value=TextSubstitution(text="RGB")
     )
     topic_name = DeclareLaunchArgument(
-        "topic_name", default_value=TextSubstitution(text="camera_2")
+        "topic_name", default_value=['camera_', LaunchConfiguration('camera_id')]
     )
     image_compress = DeclareLaunchArgument(
         "image_compress", default_value=TextSubstitution(text="false")
@@ -45,7 +45,7 @@ def generate_launch_description():
         "image_rectify", default_value=TextSubstitution(text="false")
     )
     camera_parameter_path = DeclareLaunchArgument(
-        "camera_parameter_path", default_value=TextSubstitution(text="/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml")
+        "camera_parameter_path", default_value=TextSubstitution(text="/home/henry/Documents/projects/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml")
     )
 
     # start another turtlesim_node in the turtlesim2 namespace
@@ -54,6 +54,7 @@ def generate_launch_description():
             package='rb5_ros2_vision',
             node_executable='rb_camera_ocv_node',
             name='rb_camera_webcam_ocv',
+            output='screen',
             parameters=[{
                 "use_rb_cam": LaunchConfiguration('use_rb_cam'),
                 "camera_id": LaunchConfiguration('camera_id'),
