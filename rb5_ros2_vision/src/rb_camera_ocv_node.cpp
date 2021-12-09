@@ -143,7 +143,7 @@ void RbCamera::buildGStreamerPipeline(){
   if (!data.pipeline || !data.convert || !data.source || !data.appsink ||
       !data.capsfiltersrc || !data.capsfilterapp ) {
     g_printerr ("Not all elements could be created.\n");
-    return;
+    exit(0);
   }
 
   // Build pipeline
@@ -151,7 +151,7 @@ void RbCamera::buildGStreamerPipeline(){
   if (gst_element_link_many (data.source, data.capsfiltersrc, data.convert, data.capsfilterapp, data.appsink, nullptr) != TRUE) {
     g_printerr ("Elements could not be linked.\n");
     gst_object_unref (data.pipeline);
-    return;
+    exit(0);
   }
 
   if (use_rb_cam) {
@@ -172,7 +172,7 @@ void RbCamera::startGStreamerPipeline(){
   if(ret == GST_STATE_CHANGE_FAILURE){
     g_printerr ("Unable to set the pipeline to the playing state.\n");
     gst_object_unref (data.pipeline);
-    return;
+    exit(0);
   }
   bus = gst_element_get_bus (data.pipeline);
 
