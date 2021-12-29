@@ -20,11 +20,25 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(tf2 REQUIRED)
+
+find_package(apriltag REQUIRED)
+find_package(OpenCV REQUIRED)
 
 
-include_directories(include)
+include_directories(
+  include
+  ${OpenCV_INCLUDE_DIRS}
+)
+
 add_executable(april_detection_node src/april_detection_node.cpp src/april_detection.cpp)
 ament_target_dependencies(april_detection_node rclcpp std_msgs)
+
+target_link_libraries(april_detection_node
+  apriltag::apriltag
+  ${OpenCV_LIBRARIES}
+)
 
 install(TARGETS
   april_detection_node
