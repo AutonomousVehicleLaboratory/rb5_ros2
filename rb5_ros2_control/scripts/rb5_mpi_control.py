@@ -133,7 +133,6 @@ class MegaPiController(Node):
 
 
     def move_joy(self, joy_cmd):
-        self.get_logger().info("Received a message")
 
         if joy_cmd.buttons[5]:
             if joy_cmd.axes[0] > 0.0:
@@ -159,8 +158,6 @@ class MegaPiController(Node):
         else:
             self.move("stop", 0)
 
-
-        self.get_logger().info("Terminated message")
 
     def move_dir(self, str_cmd):
         
