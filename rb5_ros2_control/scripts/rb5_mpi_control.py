@@ -9,6 +9,7 @@ from megapi import *
 
 class MegaPiController(Node):
     def __init__(self):
+        super().__init__('rb5_control')
         self.bot = MegaPi()
         self.bot.start('/dev/ttyUSB0')
 
@@ -26,7 +27,7 @@ class MegaPiController(Node):
         # port10: front left (wheel 2)
 
         if direction == "left":
-            rospy.loginfo("Moving left")
+            self.get_logger().info("Moving left")
             # fl wheel
             self.bot.motorRun(10, speed)
 
@@ -40,7 +41,7 @@ class MegaPiController(Node):
             self.bot.motorRun(9, -speed)
             return
         elif direction == "right":
-            rospy.loginfo("Moving right")
+            self.get_logger().info("Moving right")
             # fl wheel
             self.bot.motorRun(10, -speed)
 
@@ -54,7 +55,7 @@ class MegaPiController(Node):
             self.bot.motorRun(9, speed)
             return
         elif direction == "forward":
-            rospy.loginfo("Moving forward")
+            self.get_logger().info("Moving forward")
             # fl wheel
             self.bot.motorRun(10, -speed)
 
@@ -70,7 +71,7 @@ class MegaPiController(Node):
 
             return
         elif direction == "reverse":
-            rospy.loginfo("Moving in reverse")
+            self.get_logger().info("Moving in reverse")
             # fl wheel
             self.bot.motorRun(10, speed)
 
@@ -85,8 +86,8 @@ class MegaPiController(Node):
 
             return
         elif direction == "ccwise":
-            # TODO: Counter clockwise
-            rospy.loginfo("Moving counter clockwise")
+            # Counter clockwise
+            self.get_logger().info("Moving counter clockwise")
             # fl wheel
             self.bot.motorRun(10, speed)
 
@@ -99,8 +100,8 @@ class MegaPiController(Node):
             # rr wheel
             self.bot.motorRun(9, speed)
         elif direction == "cwise":
-            # TODO: clockwise
-            rospy.loginfo("Moving clockwise")
+            # Clockwise
+            self.get_logger().info("Moving clockwise")
             # fl wheel
             self.bot.motorRun(10, -speed)
 
@@ -114,7 +115,7 @@ class MegaPiController(Node):
             self.bot.motorRun(9, -speed)
 
         else:
-            rospy.loginfo("Stopping")
+            self.get_logger().info("Stopping")
             # fl wheel
             self.bot.motorRun(10, 0)
 
@@ -132,6 +133,8 @@ class MegaPiController(Node):
 
 
     def move_joy(self, joy_cmd):
+        self.get_logger().info("Received a message")
+
         if joy_cmd.buttons[5]:
             if joy_cmd.axes[0] > 0.0:
                 # left
@@ -157,6 +160,7 @@ class MegaPiController(Node):
             self.move("stop", 0)
 
 
+        self.get_logger().info("Terminated message")
 
     def move_dir(self, str_cmd):
         
