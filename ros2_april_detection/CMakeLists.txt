@@ -17,9 +17,11 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(tf2 REQUIRED)
 
@@ -33,7 +35,11 @@ include_directories(
 )
 
 add_executable(april_detection_node src/april_detection_node.cpp src/april_detection.cpp)
-ament_target_dependencies(april_detection_node rclcpp std_msgs)
+ament_target_dependencies(april_detection_node 
+  "rclcpp"
+  "std_msgs"
+  "sensor_msgs"
+  "geometry_msgs")
 
 target_link_libraries(april_detection_node
   apriltag::apriltag
@@ -42,7 +48,7 @@ target_link_libraries(april_detection_node
 
 install(TARGETS
   april_detection_node
-  DESTINATION lib/april_detection)
+  DESTINATION lib/${PROJECT_NAME})
 
 
 if(BUILD_TESTING)
