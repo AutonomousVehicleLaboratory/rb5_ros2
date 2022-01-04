@@ -24,6 +24,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 find_package(apriltag REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -39,7 +40,10 @@ ament_target_dependencies(april_detection_node
   "rclcpp"
   "std_msgs"
   "sensor_msgs"
-  "geometry_msgs")
+  "geometry_msgs"
+  "cv_bridge"
+  "tf2"
+  "tf2_ros")
 
 target_link_libraries(april_detection_node
   apriltag::apriltag
