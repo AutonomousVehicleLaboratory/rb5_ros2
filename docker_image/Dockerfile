@@ -13,6 +13,10 @@ ENV ROS_DISTRO dashing
 COPY prepare_colcon_ws.sh /root/install/
 RUN /root/install/prepare_colcon_ws.sh
 
+# Install GTSAM
+COPY install_gtsam.sh /root/install
+RUN /root/install/install_gtsam.sh
+
 COPY ./ros_entrypoint.sh /
 ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]
