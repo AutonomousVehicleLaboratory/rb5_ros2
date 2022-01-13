@@ -26,12 +26,18 @@ find_package(cv_bridge REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 
+# Include GTSAM CMake tools
+find_package(GTSAMCMakeTools)
+# Find GTSAM components
+find_package(GTSAM REQUIRED)
+
 # TODO: add gtsam deps
 find_package(OpenCV REQUIRED)
 
 # TODO: add gtsam include
 include_directories(
   include
+  ${GTSAM_INCLUDE_DIR}
 )
 
 add_executable(april_slam_node src/april_slam_node.cpp src/april_slam.cpp)
@@ -46,6 +52,7 @@ ament_target_dependencies(april_slam_node
 
 target_link_libraries(april_slam_node
   ${OpenCV_LIBRARIES}
+  gtsam
 )
 
 install(TARGETS
