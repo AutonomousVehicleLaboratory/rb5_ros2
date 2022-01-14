@@ -30,6 +30,7 @@ class AprilSlamNode : public rclcpp::Node{
     //callbacks
     void aprilCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
       RCLCPP_INFO(this->get_logger(), "Receiving Marker Pose");
+      // unsigned int marker_id = msg->header.seq;
       return;
     }
 
@@ -38,6 +39,11 @@ class AprilSlamNode : public rclcpp::Node{
 };
 
 int main(int argc, char* argv[]){
+  rclcpp::init(argc, argv);
   auto node = std::make_shared<AprilSlamNode>();
-  std::cout << argc << argv[0] << std::endl;
+  rclcpp::spin(node);
+  rclcpp::shutdown();
+
+  // std::cout << argc << argv[0] << std::endl;
+  return 0;
 }

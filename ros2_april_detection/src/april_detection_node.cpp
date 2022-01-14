@@ -3,6 +3,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include "sensor_msgs/msg/image.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "geometry_msgs/msg/pose_array.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 
 #include <tf2/LinearMath/Quaternion.h>
@@ -70,13 +71,17 @@ class AprilDetectionNode : public rclcpp::Node{
       tf2::Quaternion q;
       tf2::Matrix3x3 so3_mat;
       //tf2::Transform tf;
-      geometry_msgs::msg::TransformStamped tf_gm;
       // tf2_ros::TransformBroadcaster br;
-      
+
+      geometry_msgs::msg::TransformStamped tf_gm;
+      vector<geometry_msgs::msg::PoseStamped> output_array;      
 
       for (unsigned int i=0; i<poses.size(); i++){
         string marker_name = "marker_" + to_string(ids[i]);
         geometry_msgs::msg::TransformStamped tf_gm;
+        geometry_msgs::msg::PoseStamped msg;
+        
+        
         tf_gm.header.stamp = this->get_clock()->now();
         tf_gm.header.frame_id = "camera";
         tf_gm.child_frame_id = marker_name;
@@ -85,6 +90,8 @@ class AprilDetectionNode : public rclcpp::Node{
         // tf.setOrigin(tf::Vector3(poses[i].t->data[0],
         //                         poses[i].t->data[1],
         //                         poses[i].t->data[2]));
+
+
         tf_gm.transform.translation.x = poses[i].t->data[0];
         tf_gm.transform.translation.y = poses[i].t->data[1];
         tf_gm.transform.translation.z = poses[i].t->data[2];
@@ -104,8 +111,20 @@ class AprilDetectionNode : public rclcpp::Node{
         tf_gm.transform.rotation.z = q.z();
         tf_gm.transform.rotation.w = q.w();
 
-        //tf.setRotation(q);
-        //br.sendTransform(tf::StampedTransform(tf, ros::Time::now(), "camera", marker_name));
+        // populate msg
+        msg.header.stamp = this->now();
+        msg.header.frame_id = to_string(ids[i]);
+        msg.pose.position.x = poses[i].t->data[0];
+        msg.pose.position.y = poses[i].t->data[1];
+        msg.pose.position.z = poses[i].t->data[2];
+
+        msg.pose.orientation.x = q.x();
+        msg.pose.orientation.y = q.y();
+        msg.pose.orientation.z = q.z();
+        msg.pose.orientation.w = q.w();
+        // output_array.push_back(msg);
+        pose_pub_->publish(msg);
+        // send TF
         tf_->sendTransform(tf_gm);
         RCLCPP_INFO(this->get_logger(), "Sending TF");
         //RCLCPP_INFO("Transformation published for marker.");
@@ -120,9 +139,10 @@ class AprilDetectionNode : public rclcpp::Node{
       // rectify and run detection (pair<vector<apriltag_pose_t>, cv::Mat>)
       auto april_obj =  det.processImage(rectify(img_cv->image));
 
+      // TODO: return geometry_msgs::PoseStamped
       publishTransforms(get<0>(april_obj), get<1>(april_obj));
-      //geometry_msgs::PoseStamped pose_msg;
-      //pose_pub_->publish(pose_msg);
+      // geometry_msgs::msg::PoseStamped pose_msg;
+      // pose_pub_->publish(pose_msg);
 
       return;
     }
