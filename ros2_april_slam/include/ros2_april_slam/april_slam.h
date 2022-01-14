@@ -1,6 +1,7 @@
 #ifndef APRIL_SLAM_H
 #define APRIL_SLAM_H
 
+#include <bits/stdc++.h>
 #include <gtsam/geometry/Pose2.h>
 #include <gtsam/geometry/Point2.h>
 #include <gtsam/inference/Symbol.h>
@@ -11,7 +12,9 @@
 #include <gtsam/nonlinear/Marginals.h>
 #include <gtsam/nonlinear/Values.h>
 
+
 using namespace gtsam;
+using namespace std;
 
 class AprilSlam{
   public:
@@ -19,8 +22,8 @@ class AprilSlam{
     ~AprilSlam();
 
   private:
-      NonlinearFactorGraph graph;
-
+      NonlinearFactorGraph graph_;
+      unordered_map<string, Symbol> landmarks_;
 
 };
 
