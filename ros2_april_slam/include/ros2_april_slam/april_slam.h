@@ -22,8 +22,21 @@ class AprilSlam{
     ~AprilSlam();
 
   private:
+
+      // gtsam
       NonlinearFactorGraph graph_;
+      Symbol x0;
       unordered_map<string, Symbol> landmarks_;
+      unordered_map<int, Symbol> poses_;
+
+      // priors
+      Pose2 init_prior;
+      noiseModel::Diagonal::shared_ptr init_prior_noise, imu_noise;
+
+      // methods
+      void update(vector<float> imu_z, vector<float> marker_z);
+     
+
 
 };
 
