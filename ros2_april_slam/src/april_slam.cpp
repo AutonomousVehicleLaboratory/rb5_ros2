@@ -33,9 +33,9 @@ vector<float> AprilSlam::transformCoordinate(float theta, vector<float> t, vecto
 
 void AprilSlam::updateMeasurement(vector<float> imu_z, vector<float> marker_z, unsigned int marker_id){
 
-  std::cout << "Updating measurement" << std::endl;
+  // std::cout << "Updating measurement" << std::endl;
   float dx = imu_z[0], dy = imu_z[1], dtheta = imu_z[2];
-  std::cout << "z: " << marker_z[0] << " " << marker_z[1]<< std::endl;
+  // std::cout << "z: " << marker_z[0] << " " << marker_z[1]<< std::endl;
   // float range = marker_z[0], bearing = marker_z[1];
   float x_l = marker_z[0], y_l = marker_z[1];
   double bearing = atan(y_l / x_l);
@@ -67,7 +67,7 @@ void AprilSlam::updateMeasurement(vector<float> imu_z, vector<float> marker_z, u
   vector<float> l_estimate = transformCoordinate(running_estimate[2], running_estimate, vector<float>({x_l, y_l}));
 
 
-  // TODO: provide a pose estimate for landmarks in addition to poses
+  // provide a pose estimate for landmarks in addition to poses
   if (!pose_estimates.exists(x_curr.key())){
     pose_estimates.insert(x_curr, Pose2(running_estimate[0],
                                         running_estimate[1],
@@ -86,9 +86,9 @@ void AprilSlam::optimizeGraph(){
   LevenbergMarquardtOptimizer optimizer(graph_, pose_estimates);
 
   Values result = optimizer.optimize();
-  result.print("Final Result:\n");
+  // result.print("Final Result:\n");
 
   // TODO: update pose estimates
-  pose_estimates = Values();
+  // pose_estimates = Values();
   return;
 }

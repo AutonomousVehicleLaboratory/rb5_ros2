@@ -4,6 +4,7 @@
 #include "sensor_msgs/msg/imu.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include <math.h>
+#include <chrono>
 
 
 // using std::placeholders::_1;
@@ -53,16 +54,24 @@ class AprilSlamNode : public rclcpp::Node{
       double bearing = atan(y / x);
 
 
-      cout << "Marker (" << msg->header.frame_id << ") |";
-      RCLCPP_INFO(this->get_logger(), "r: %f, bearing: %f", range, bearing);
+      // cout << "Marker (" << msg->header.frame_id << ") |";
+      // RCLCPP_INFO(this->get_logger(), "r: %f, bearing: %f", range, bearing);
 
       // map.updateState(odom);
 
+      auto t_start = std::chrono::high_resolution_clock::now();
       map.updateMeasurement(odom, vector<float>({x, y}), stoi(msg->header.frame_id));
+      auto t_stop = std::chrono::high_resolution_clock::now();
       odom[0] = odom[1] = odom[2] = 0.0;
+      auto update_dt = std::chrono::duration_cast<std::chrono::microseconds>(t_stop - t_start);
+      // std::cout << "Update dt: " << update_dt.count() << std::endl;
 
-      if (optimizer_trigger % 10 == 0 ){
+      if (optimizer_trigger % 20 == 0 ){
+        t_start = std::chrono::high_resolution_clock::now();
         map.optimizeGraph();
+        t_stop = std::chrono::high_resolution_clock::now();
+        update_dt = std::chrono::duration_cast<std::chrono::microseconds>(t_stop - t_start);
+        std::cout << "Optimization dt: " << update_dt.count() << std::endl;
         optimizer_trigger = 0;
       }
 
