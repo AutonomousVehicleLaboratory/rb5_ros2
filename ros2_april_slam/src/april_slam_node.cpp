@@ -29,8 +29,10 @@ class AprilSlamNode : public rclcpp::Node{
   private:
 
     // gtsam optimization 
-    AprilSlam env;
+    AprilSlam map;
     vector<float> odom = {0.0, 0.0, 0.0};
+    int optimizer_trigger = 0, imu_trigger = 0;
+
     bool imu_init;
     double t_prev;
 
@@ -43,20 +45,34 @@ class AprilSlamNode : public rclcpp::Node{
     //callbacks
     void aprilCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
       
-      double range = sqrt( pow(msg->pose.position.x, 2) + 
-                           pow(msg->pose.position.z, 2) );
+      ++optimizer_trigger;
+      double x = msg->pose.position.x;
+      double y = msg->pose.position.z;
+      double range = sqrt( pow(x, 2) + pow(y, 2) );
 
-      double bearing = atan(msg->pose.position.z / msg->pose.position.x);
+      double bearing = atan(y / x);
 
 
       cout << "Marker (" << msg->header.frame_id << ") |";
       RCLCPP_INFO(this->get_logger(), "r: %f, bearing: %f", range, bearing);
+
+      // map.updateState(odom);
+
+      map.updateMeasurement(odom, vector<float>({x, y}), stoi(msg->header.frame_id));
+      odom[0] = odom[1] = odom[2] = 0.0;
+
+      if (optimizer_trigger % 10 == 0 ){
+        map.optimizeGraph();
+        optimizer_trigger = 0;
+      }
+
 
       return;
     }
     
     void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg){
 
+      ++imu_trigger;
       if (!imu_init) {
         imu_init = true;
         t_prev = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
@@ -72,7 +88,7 @@ class AprilSlamNode : public rclcpp::Node{
       double w_z = msg->angular_velocity.z;
       double a_x = msg->linear_acceleration.x;
       double a_y = msg->linear_acceleration.y;
-      double a_z = msg->linear_acceleration.z;
+      // double a_z = msg->linear_acceleration.z;
 
       odom[0] +=  a_x * dt * dt; // x = x(0) + a_x * dt^2
       odom[1] +=  a_y * dt * dt; // y = y(0) + a_y * dt^2
