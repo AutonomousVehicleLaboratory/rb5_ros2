@@ -50,13 +50,26 @@ ament_target_dependencies(april_slam_node
   "tf2"
   "tf2_ros")
 
+add_executable(state_from_imu src/state_from_imu.cpp)
+ament_target_dependencies(state_from_imu 
+  "rclcpp"
+  "std_msgs"
+  "sensor_msgs"
+  "geometry_msgs"
+  "cv_bridge"
+  "tf2"
+  "tf2_ros")
+
 target_link_libraries(april_slam_node
   ${OpenCV_LIBRARIES}
   gtsam
 )
+target_link_libraries(state_from_imu
+)
 
 install(TARGETS
   april_slam_node
+  state_from_imu
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

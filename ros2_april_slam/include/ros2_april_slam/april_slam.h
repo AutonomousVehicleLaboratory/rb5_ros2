@@ -25,7 +25,7 @@ class AprilSlam{
     
     // methods
     void updateMeasurement(vector<float> imu_z, vector<float> marker_z, unsigned int marker_id);
-    void optimizeGraph();
+    int optimizeGraph();
   private:
 
       // 

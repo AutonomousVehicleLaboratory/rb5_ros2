@@ -82,7 +82,7 @@ void AprilSlam::updateMeasurement(vector<float> imu_z, vector<float> marker_z, u
   return;
 }
 
-void AprilSlam::optimizeGraph(){
+int AprilSlam::optimizeGraph(){
   LevenbergMarquardtOptimizer optimizer(graph_, pose_estimates);
 
   Values result = optimizer.optimize();
@@ -90,5 +90,5 @@ void AprilSlam::optimizeGraph(){
 
   // TODO: update pose estimates
   // pose_estimates = Values();
-  return;
+  return result.size();
 }

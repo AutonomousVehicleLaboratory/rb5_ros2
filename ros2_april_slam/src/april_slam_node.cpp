@@ -32,6 +32,7 @@ class AprilSlamNode : public rclcpp::Node{
     // gtsam optimization 
     AprilSlam map;
     vector<float> odom = {0.0, 0.0, 0.0};
+    vector<float> velocities = {0.0, 0.0};
     int optimizer_trigger = 0, imu_trigger = 0;
 
     bool imu_init;
@@ -68,10 +69,11 @@ class AprilSlamNode : public rclcpp::Node{
 
       if (optimizer_trigger % 20 == 0 ){
         t_start = std::chrono::high_resolution_clock::now();
-        map.optimizeGraph();
+        int graph_size = map.optimizeGraph();
         t_stop = std::chrono::high_resolution_clock::now();
         update_dt = std::chrono::duration_cast<std::chrono::microseconds>(t_stop - t_start);
-        std::cout << "Optimization dt: " << update_dt.count() << std::endl;
+        std::cout << "Optimization dt: " << update_dt.count() << " | ";
+        std::cout << "Graph size: " << graph_size << std::endl;
         optimizer_trigger = 0;
       }
 
@@ -99,8 +101,11 @@ class AprilSlamNode : public rclcpp::Node{
       double a_y = msg->linear_acceleration.y;
       // double a_z = msg->linear_acceleration.z;
 
-      odom[0] +=  a_x * dt * dt; // x = x(0) + a_x * dt^2
-      odom[1] +=  a_y * dt * dt; // y = y(0) + a_y * dt^2
+      velocities[0] += a_x * dt;
+      velocities[1] += a_y * dt;
+
+      odom[0] +=  velocities[0] * dt; // x = x(0) + a_x * dt^2
+      odom[1] +=  velocities[1] * dt; // y = y(0) + a_y * dt^2
       odom[2] +=  w_z * dt; // yaw
 
       // RCLCPP_INFO(this->get_logger(), "a_x: %f, a_y: %f, a_z: %f", a_x, a_y, a_z);
