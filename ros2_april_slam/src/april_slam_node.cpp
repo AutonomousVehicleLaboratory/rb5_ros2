@@ -31,8 +31,8 @@ class AprilSlamNode : public rclcpp::Node{
 
     // gtsam optimization 
     AprilSlam map;
-    vector<float> odom = {0.0, 0.0, 0.0};
-    vector<float> velocities = {0.0, 0.0};
+    Vector3 odom = {0.0, 0.0, 0.0};
+    Vector2 velocities = {0.0, 0.0};
     int optimizer_trigger = 0, imu_trigger = 0;
 
     bool imu_init;
@@ -50,18 +50,12 @@ class AprilSlamNode : public rclcpp::Node{
       ++optimizer_trigger;
       double x = msg->pose.position.x;
       double y = msg->pose.position.z;
-      double range = sqrt( pow(x, 2) + pow(y, 2) );
-
-      double bearing = atan(y / x);
-
-
-      // cout << "Marker (" << msg->header.frame_id << ") |";
+      // double range = sqrt( pow(x, 2) + pow(y, 2) );
+      // double bearing = atan(y / x);
       // RCLCPP_INFO(this->get_logger(), "r: %f, bearing: %f", range, bearing);
 
-      // map.updateState(odom);
-
       auto t_start = std::chrono::high_resolution_clock::now();
-      map.updateMeasurement(odom, vector<float>({x, y}), stoi(msg->header.frame_id));
+      map.updateMeasurement(odom, Vector2(x, y), stoi(msg->header.frame_id));
       auto t_stop = std::chrono::high_resolution_clock::now();
       odom[0] = odom[1] = odom[2] = 0.0;
       auto update_dt = std::chrono::duration_cast<std::chrono::microseconds>(t_stop - t_start);
@@ -95,11 +89,9 @@ class AprilSlamNode : public rclcpp::Node{
       double dt = t - t_prev;
       t_prev = t;
 
-      // RCLCPP_INFO(this->get_logger(), "Received: %f", dt);
       double w_z = msg->angular_velocity.z;
       double a_x = msg->linear_acceleration.x;
       double a_y = msg->linear_acceleration.y;
-      // double a_z = msg->linear_acceleration.z;
 
       velocities[0] += a_x * dt;
       velocities[1] += a_y * dt;
@@ -107,9 +99,6 @@ class AprilSlamNode : public rclcpp::Node{
       odom[0] +=  velocities[0] * dt; // x = x(0) + a_x * dt^2
       odom[1] +=  velocities[1] * dt; // y = y(0) + a_y * dt^2
       odom[2] +=  w_z * dt; // yaw
-
-      // RCLCPP_INFO(this->get_logger(), "a_x: %f, a_y: %f, a_z: %f", a_x, a_y, a_z);
-      // RCLCPP_INFO(this->get_logger(), "Receiving IMU data: %f, %f, %f", odom[0], odom[1], odom[2]);
 
       return;
     }

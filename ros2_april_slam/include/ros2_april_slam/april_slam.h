@@ -24,12 +24,12 @@ class AprilSlam{
     ~AprilSlam();
     
     // methods
-    void updateMeasurement(vector<float> imu_z, vector<float> marker_z, unsigned int marker_id);
+    void updateMeasurement(Vector3 imu_z, Vector2 marker_z, unsigned int marker_id);
     int optimizeGraph();
   private:
 
       // 
-      vector<float> transformCoordinate(float theta, vector<float> t, vector<float> p);
+      Vector2 transformCoordinate(float theta, Vector2 t, Vector2 p);
 
       // gtsam
       NonlinearFactorGraph graph_;

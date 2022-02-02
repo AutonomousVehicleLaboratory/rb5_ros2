@@ -39,7 +39,7 @@ include_directories(
   include
   ${GTSAM_INCLUDE_DIR}
 )
-
+set(CMAKE_CXX_FLAGS "-O3 -Wall ${CMAKE_CXX_FLAGS}")
 add_executable(april_slam_node src/april_slam_node.cpp src/april_slam.cpp)
 ament_target_dependencies(april_slam_node 
   "rclcpp"
