@@ -19,12 +19,18 @@ endif()
 find_package(ament_cmake REQUIRED)
 
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(rcutils REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(rmw_fastrtps_cpp QUIET)
+find_package(rosbag2_storage REQUIRED)
+find_package(rosbag2_storage_default_plugins REQUIRED)
+find_package(rosbag2_test_common REQUIRED)
 
 # Include GTSAM CMake tools
 find_package(GTSAMCMakeTools)
@@ -50,6 +56,20 @@ ament_target_dependencies(april_slam_node
   "tf2"
   "tf2_ros")
 
+add_executable(april_mapper src/april_mapper.cpp src/april_slam.cpp)
+ament_target_dependencies(april_mapper
+  "rclcpp"
+  "rclcpp_components"
+  "rcutils"
+  "std_msgs"
+  "sensor_msgs"
+  "geometry_msgs"
+  "cv_bridge"
+  "rosbag2_storage"
+  "rosbag2_storage_default_plugins"
+  "tf2"
+  "tf2_ros")
+
 add_executable(state_from_imu src/state_from_imu.cpp)
 ament_target_dependencies(state_from_imu 
   "rclcpp"
@@ -64,11 +84,17 @@ target_link_libraries(april_slam_node
   ${OpenCV_LIBRARIES}
   gtsam
 )
+
+target_link_libraries(april_mapper
+  ${OpenCV_LIBRARIES}
+  gtsam
+)
 target_link_libraries(state_from_imu
 )
 
 install(TARGETS
   april_slam_node
+  april_mapper
   state_from_imu
   DESTINATION lib/${PROJECT_NAME})
 
