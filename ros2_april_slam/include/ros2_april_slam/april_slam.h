@@ -25,7 +25,10 @@ class AprilSlam{
     
     // methods
     void updateMeasurement(Vector3 imu_z, Vector2 marker_z, unsigned int marker_id);
-    int optimizeGraph();
+    Values optimizeGraph();
+    Values getStates();
+    vector<Matrix21> getLandmarks();
+
   private:
 
       // 
@@ -40,6 +43,7 @@ class AprilSlam{
       unsigned long long current_state_;
       vector<float> running_estimate = {0.0, 0.0, 0.0};
       Values pose_estimates;
+      Values corrected_states;
 
       // priors
       Pose2 init_prior;

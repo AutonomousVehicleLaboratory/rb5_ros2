@@ -23,6 +23,21 @@ AprilSlam::~AprilSlam(){
   return;
 }
 
+Values AprilSlam::getStates(){
+  return corrected_states;
+}
+// template <typename T> std::string type_name();
+vector<Matrix21> AprilSlam::getLandmarks(){
+
+  vector<Matrix21> all_landmarks;
+
+  for (auto cur_landmark : landmarks_){
+    all_landmarks.push_back(corrected_states.at<Matrix21>(cur_landmark.second));  
+  }
+
+  return all_landmarks;
+}
+
 Vector2 AprilSlam::transformCoordinate(float theta, Vector2 t, Vector2 p){
 
   
@@ -81,10 +96,9 @@ void AprilSlam::updateMeasurement(Vector3 imu_z, Vector2 marker_z, unsigned int 
   return;
 }
 
-int AprilSlam::optimizeGraph(){
+Values AprilSlam::optimizeGraph(){
   LevenbergMarquardtOptimizer optimizer(graph_, pose_estimates);
+  corrected_states = optimizer.optimize();
 
-  Values result = optimizer.optimize();
-
-  return result.size();
+  return corrected_states;
 }

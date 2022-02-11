@@ -50,8 +50,6 @@ class AprilSlamNode : public rclcpp::Node{
       ++optimizer_trigger;
       double x = msg->pose.position.x;
       double y = msg->pose.position.z;
-      // double range = sqrt( pow(x, 2) + pow(y, 2) );
-      // double bearing = atan(y / x);
       // RCLCPP_INFO(this->get_logger(), "r: %f, bearing: %f", range, bearing);
 
       auto t_start = std::chrono::high_resolution_clock::now();
@@ -59,11 +57,11 @@ class AprilSlamNode : public rclcpp::Node{
       auto t_stop = std::chrono::high_resolution_clock::now();
       odom[0] = odom[1] = odom[2] = 0.0;
       auto update_dt = std::chrono::duration_cast<std::chrono::microseconds>(t_stop - t_start);
-      // std::cout << "Update dt: " << update_dt.count() << std::endl;
 
       if (optimizer_trigger % 20 == 0 ){
         t_start = std::chrono::high_resolution_clock::now();
-        int graph_size = map.optimizeGraph();
+        gtsam::Values res_states = map.optimizeGraph();
+        int graph_size = res_states.size();
         t_stop = std::chrono::high_resolution_clock::now();
         update_dt = std::chrono::duration_cast<std::chrono::microseconds>(t_stop - t_start);
         std::cout << "Optimization dt: " << update_dt.count() << " | ";

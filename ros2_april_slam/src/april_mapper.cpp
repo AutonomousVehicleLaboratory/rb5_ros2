@@ -25,13 +25,16 @@ int optimizer_trigger = 0, imu_trigger = 0;
 bool imu_init;
 double t_prev;
 
+void saveStates(gtsam::Values states, string target_dir){
+  return;
+}
+
 //callbacks
 void aprilCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
   
   ++optimizer_trigger;
   double x = msg->pose.position.x;
   double y = msg->pose.position.z;
-  // RCLCPP_INFO(this->get_logger(), "r: %f, bearing: %f", range, bearing);
 
   auto t_start = std::chrono::high_resolution_clock::now();
   l_map.updateMeasurement(odom, Vector2(x, y), stoi(msg->header.frame_id));
@@ -41,14 +44,15 @@ void aprilCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
 
   if (optimizer_trigger % 20 == 0 ){
     t_start = std::chrono::high_resolution_clock::now();
-    int graph_size = l_map.optimizeGraph();
+    gtsam::Values res_states = l_map.optimizeGraph();
+    int graph_size = res_states.size();
+
     t_stop = std::chrono::high_resolution_clock::now();
     update_dt = std::chrono::duration_cast<std::chrono::microseconds>(t_stop - t_start);
     std::cout << "Optimization dt: " << update_dt.count() << " | ";
     std::cout << "Graph size: " << graph_size << std::endl;
     optimizer_trigger = 0;
   }
-
 
   return;
 }
@@ -105,7 +109,7 @@ std::vector<std::shared_ptr<MessageT>> processTopic(std::vector<std::shared_ptr<
       topic_messages.push_back(msg_ros);
     }
   }
-  std::cout << "Processed " << topic_messages.size() << " messages." << std::endl;
+  
   return topic_messages;
 }
 
@@ -166,12 +170,17 @@ void processImuCamera(std::vector<std::shared_ptr<rosbag2_storage::SerializedBag
 
   }
 
+  // save states
+  // Values final_states = l_map.getStates(); 
+
+  // get landmarks
+  auto landmarks = l_map.getLandmarks(); 
+  for (auto landmark: landmarks){
+    cout << "matrix: " << landmark(0) << " | " << landmark(1) << endl;
+  }
 }
 int main(int argc, char* argv[]){
-  // rclcpp::init(argc, argv);
-  // auto node = std::make_shared<AprilMapper>();
-  // rclcpp::spin(node);
-  // rclcpp::shutdown();
+
   std::string dir_path = "/home/dpaz/Documents/gtsam_data/rosbag2_2022_02_09-02_25_26";
 
   auto bag = getMessages(dir_path);
