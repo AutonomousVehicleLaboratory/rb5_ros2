@@ -139,21 +139,23 @@ ${catkin_LIBRARIES}
 # )
 
 # Node for monocular-inertial camera
-# add_executable(Mono_Inertial
-# src/ros_mono_inertial.cc
-# )
-# ament_target_dependencies(Mono_Inertial
-#   "rclcpp"
-#   "sensor_msgs"
-#   "cv_bridge"
-#   "tf2"
-#   "tf2_ros"
-#   "image_transport"
-# )
+add_executable(Mono_Inertial
+src/ros_mono_inertial.cc
+)
+ament_target_dependencies(Mono_Inertial
+  "rclcpp"
+  "sensor_msgs"
+  "geometry_msgs"
+  "cv_bridge"
+  "tf2"
+  "tf2_ros"
+  "image_transport"
+)
 
-# target_link_libraries(Mono_Inertial
-# ${LIBS}
-# )
+target_link_libraries(Mono_Inertial
+${LIBS}
+${catkin_LIBRARIES}
+)
 
 # Node for stereo-inertial camera
 # add_executable(Stereo_Inertial
@@ -185,6 +187,11 @@ endif()
 
 install(TARGETS
   Mono
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS
+  Mono_Inertial
   DESTINATION lib/${PROJECT_NAME}
 )
 
