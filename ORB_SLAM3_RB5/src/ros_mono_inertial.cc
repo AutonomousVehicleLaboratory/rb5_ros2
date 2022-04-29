@@ -43,7 +43,6 @@
 #include "../include/ImuTypes.h"
 
 using namespace std;
-using std::placeholders::_1;
 
 static int cameraWidth, cameraHeight;
 
@@ -74,12 +73,12 @@ public:
   ImageImuGrabber(ORB_SLAM3::System *pSLAM, const bool bClahe) : Node("Mono_Inertial")
   {
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
-        "/camera_0", 10, std::bind(&ImageImuGrabber::GrabImage, this, _1));
+        "/camera_0", 10, std::bind(&ImageImuGrabber::GrabImage, this, std::placeholders::_1));
 
     pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/camera_pose", 10);
 
     imu_sub_ = this->create_subscription<sensor_msgs::msg::Imu>(
-        "/imu", 1000, std::bind(&ImageImuGrabber::GrabImu, this, _1));
+        "/imu", 1000, std::bind(&ImageImuGrabber::GrabImu, this, std::placeholders::_1));
 
     tf_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
@@ -133,6 +132,8 @@ int main(int argc, char **argv)
 
 void ImageImuGrabber::GrabImage(const sensor_msgs::msg::Image::SharedPtr img_msg)
 {
+  rclcpp::Time stamp = img_msg->header.stamp;
+  std::cout << "img time:" << stamp.seconds() << std::endl;
   mBufMutexImage.lock();
   if (!img0Buf.empty())
     img0Buf.pop();
@@ -186,8 +187,9 @@ void ImageImuGrabber::SyncWithImu()
   {
     cv::Mat im;
     double tIm = 0;
-    if (!img0Buf.empty() && !imuBuf.empty())
+    if (!img0Buf.empty() && imuBuf.size() > 1) //!imuBuf.empty())
     {
+      rclcpp::Time im_stamp;
       tIm = double(img0Buf.front()->header.stamp.sec) + double(img0Buf.front()->header.stamp.nanosec) * 1e-9;
       double tIm_back = double(img0Buf.back()->header.stamp.sec) + double(img0Buf.back()->header.stamp.nanosec) * 1e-9;
       if (tIm > tIm_back)
@@ -195,29 +197,49 @@ void ImageImuGrabber::SyncWithImu()
       {
         this->mBufMutexImage.lock();
         im = GetImage(img0Buf.front());
+        im_stamp = img0Buf.front()->header.stamp;
         img0Buf.pop();
         this->mBufMutexImage.unlock();
       }
 
       vector<ORB_SLAM3::IMU::Point> vImuMeas;
+      rclcpp::Time ts = rclcpp::Clock().now();
+      std::cout << "ts: " << ts.seconds() << std::endl;
       mBufMutexImu.lock();
       if (!imuBuf.empty())
       {
         // Load imu measurements from buffer
         vImuMeas.clear();
         double tImu = double(imuBuf.front()->header.stamp.sec) + double(imuBuf.front()->header.stamp.nanosec) * 1e-9;
+        // std::cout << "tImu: " << tImu << " tIm: " << tIm << std::endl;
         while (!imuBuf.empty() && tImu <= tIm)
         {
           cv::Point3f acc(imuBuf.front()->linear_acceleration.x, imuBuf.front()->linear_acceleration.y, imuBuf.front()->linear_acceleration.z);
           cv::Point3f gyr(imuBuf.front()->angular_velocity.x, imuBuf.front()->angular_velocity.y, imuBuf.front()->angular_velocity.z);
           vImuMeas.push_back(ORB_SLAM3::IMU::Point(acc, gyr, tImu));
           imuBuf.pop();
+          // std::cout << "acc" << acc << "gyr" << gyr << std::endl;
+          // std::cout << "bufsize: " << imuBuf.size() << std::endl;
+          if (!imuBuf.empty()) {
+            tImu = double(imuBuf.front()->header.stamp.sec) + double(imuBuf.front()->header.stamp.nanosec) * 1e-9;
+            // std::cout << "tImu: " << tImu << " tIm: " << tIm << std::endl;
+          }
         }
       }
+
       mBufMutexImu.unlock();
+      
+      if (vImuMeas.size() <= 1) {
+        std::cout << "Imu size small:" << vImuMeas.size() << std::endl;
+        continue;
+      }
+      
+      rclcpp::Time te = rclcpp::Clock().now();
+      std::cout << "te: " << te.seconds() << std::endl;
       if (mbClahe)
         mClahe->apply(im, im);
 
+      std::cout << "IMU data size: " << vImuMeas.size() << std::endl;
       Sophus::SE3f se3_tf = mpSLAM->TrackMonocular(im, tIm, vImuMeas);
 
       cout << se3_tf.rotationMatrix() << endl;
@@ -227,8 +249,8 @@ void ImageImuGrabber::SyncWithImu()
       string child_frame_id("camera_");
       child_frame_id = child_frame_id + to_string(count);
       count += 1;
-      rclcpp::Time stamp = img0Buf.front()->header.stamp;
-      PublishPose(se3_tf, stamp, frame_id, child_frame_id);
+      // std::cout << im_stamp.seconds() << ". " << im_stamp.nanoseconds() << std::endl;
+      PublishPose(se3_tf, im_stamp, frame_id, child_frame_id);
     }
 
     std::chrono::milliseconds tSleep(1);
@@ -238,9 +260,17 @@ void ImageImuGrabber::SyncWithImu()
 
 void ImageImuGrabber::GrabImu(const sensor_msgs::msg::Imu::SharedPtr imu_msg)
 {
+
+  rclcpp::Time stamp = imu_msg->header.stamp;
+  std::cout << "imu time:" << stamp.seconds() << " Enter lock." << std::endl;
+  // rclcpp::Time ts = rclcpp::Clock().now();
+  // std::cout << "msg ts: " << ts.seconds() << std::endl;
   mBufMutexImu.lock();
   imuBuf.push(imu_msg);
   mBufMutexImu.unlock();
+  rclcpp::Time te = rclcpp::Clock().now();
+  // std::cout << "msg te: " << te.seconds() << std::endl;
+  // std::cout << "imu time:" << stamp.seconds() << " Quit lock. bufsize: " << imuBuf.size() << std::endl;
   return;
 }
 
