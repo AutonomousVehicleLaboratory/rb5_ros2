@@ -45,10 +45,10 @@ apt-get install --no-install-recommends --yes \
   libtinyxml2-dev
 
 apt-get install --yes libpython3-dev python3-pip
-apt-get install --yes libopensplice69
+#apt-get install --yes libopensplice69
 
-export RTI_NC_LICENSE_ACCEPTED=YES
-apt-get install --yes rti-connext-dds-5.3.1
+#export RTI_NC_LICENSE_ACCEPTED=YES
+#apt-get install --yes rti-connext-dds-5.3.1
 
 unset DEBIAN_FRONTEND
 rm -rf /var/lib/apt/lists/*
