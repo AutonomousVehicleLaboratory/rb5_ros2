@@ -17,6 +17,7 @@ apt-get install --yes \
   python3-pip \
   python-rosdep \
   python3-vcstool \
+  unzip \
   wget
 
 python3 -m pip install -U \
