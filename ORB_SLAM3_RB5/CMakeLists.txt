@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(orb_slam3_rb5_ros2)
 
-set(ORB_SLAM3_SOURCE_DIR "/home/henrymelodic/Documents/projects/rb5/orbslam/ORB_SLAM3_RB5/")
+set(ORB_SLAM3_SOURCE_DIR "/path/to/ORB_SLAM3_RB5_LIB/")
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
