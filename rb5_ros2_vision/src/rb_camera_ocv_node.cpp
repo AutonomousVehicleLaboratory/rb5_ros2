@@ -43,41 +43,46 @@ void RbCamera::getROSParams(){
   this->declare_parameter<bool>("image_rectify", false);
   this->declare_parameter<std::string>("camera_parameter_path", "/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_parameter.yaml");
 
-  this->get_parameter("use_rb_cam", _use_rb_cam);
-  RCLCPP_INFO(this->get_logger(), "use_rb_cam: %s", _use_rb_cam.value_to_string().c_str());
-  this->get_parameter("camera_id", _camera_id);
-  RCLCPP_INFO(this->get_logger(), "camera_id: %s", _camera_id.value_to_string().c_str());
-  this->get_parameter("frame_rate", _frame_rate);
-  RCLCPP_INFO(this->get_logger(), "frame_rate: %s", _frame_rate.value_to_string().c_str());
-  this->get_parameter("width", _width);
-  RCLCPP_INFO(this->get_logger(), "width: %s", _width.value_to_string().c_str());
-  this->get_parameter("height", _height);
-  RCLCPP_INFO(this->get_logger(), "height: %s", _height.value_to_string().c_str());
-  this->get_parameter("input_format", _input_format);
-  RCLCPP_INFO(this->get_logger(), "input_format: %s", _input_format.as_string().c_str());
-  this->get_parameter("output_format", _output_format);
-  RCLCPP_INFO(this->get_logger(), "output_format: %s", _output_format.as_string().c_str());
-  this->get_parameter("topic_name", _topic_name);
-  RCLCPP_INFO(this->get_logger(), "topic_name: %s", _topic_name.as_string().c_str());
-  this->get_parameter("image_compress", _image_compress);
-  RCLCPP_INFO(this->get_logger(), "image_compress: %s", _image_compress.value_to_string().c_str());
-  this->get_parameter("image_rectify", _image_rectify);
-  RCLCPP_INFO(this->get_logger(), "image_rectify: %s", _image_rectify.value_to_string().c_str());
-  this->get_parameter("camera_parameter_path", _camera_parameter_path);
-  RCLCPP_INFO(this->get_logger(), "camera_parameter_path", _camera_parameter_path.value_to_string().c_str());
 
-  // convert parameter type
-  use_rb_cam = _use_rb_cam.as_bool();
-  camera_id = _camera_id.as_int();
-  width = _width.as_int();
-  height = _height.as_int();
-  frame_rate = _frame_rate.as_int();
-  input_format = _input_format.as_string();
-  output_format = _output_format.as_string();
-  topic_name = _topic_name.as_string();
-  image_compress = _image_compress.as_bool();
-  image_rectify = _image_rectify.as_bool();
-  camera_parameter_path = _camera_parameter_path.as_string();
+  //////////////////////////////////////////////////
+  // THIS SECTION CRASHES THE BUILD, PROBABLY SOMETHING TO DO WITH NOT HAVING THE YAML FILE SPECIFIED IN LINE 44
+  //////////////////////////////////////////////////
+  
+  // this->get_parameter("use_rb_cam", _use_rb_cam);
+  // RCLCPP_INFO(this->get_logger(), "use_rb_cam: %s", _use_rb_cam.value_to_string().c_str());
+  // this->get_parameter("camera_id", _camera_id);
+  // RCLCPP_INFO(this->get_logger(), "camera_id: %s", _camera_id.value_to_string().c_str());
+  // this->get_parameter("frame_rate", _frame_rate);
+  // RCLCPP_INFO(this->get_logger(), "frame_rate: %s", _frame_rate.value_to_string().c_str());
+  // this->get_parameter("width", _width);
+  // RCLCPP_INFO(this->get_logger(), "width: %s", _width.value_to_string().c_str());
+  // this->get_parameter("height", _height);
+  // RCLCPP_INFO(this->get_logger(), "height: %s", _height.value_to_string().c_str());
+  // this->get_parameter("input_format", _input_format);
+  // RCLCPP_INFO(this->get_logger(), "input_format: %s", _input_format.as_string().c_str());
+  // this->get_parameter("output_format", _output_format);
+  // RCLCPP_INFO(this->get_logger(), "output_format: %s", _output_format.as_string().c_str());
+  // this->get_parameter("topic_name", _topic_name);
+  // RCLCPP_INFO(this->get_logger(), "topic_name: %s", _topic_name.as_string().c_str());
+  // this->get_parameter("image_compress", _image_compress);
+  // RCLCPP_INFO(this->get_logger(), "image_compress: %s", _image_compress.value_to_string().c_str());
+  // this->get_parameter("image_rectify", _image_rectify);
+  // RCLCPP_INFO(this->get_logger(), "image_rectify: %s", _image_rectify.value_to_string().c_str());
+  // this->get_parameter("camera_parameter_path", _camera_parameter_path);
+  // RCLCPP_INFO(this->get_logger(), "camera_parameter_path", _camera_parameter_path.value_to_string().c_str());
+
+  // // convert parameter type
+  // use_rb_cam = _use_rb_cam.as_bool();
+  // camera_id = _camera_id.as_int();
+  // width = _width.as_int();
+  // height = _height.as_int();
+  // frame_rate = _frame_rate.as_int();
+  // input_format = _input_format.as_string();
+  // output_format = _output_format.as_string();
+  // topic_name = _topic_name.as_string();
+  // image_compress = _image_compress.as_bool();
+  // image_rectify = _image_rectify.as_bool();
+  // camera_parameter_path = _camera_parameter_path.as_string();
 }
 
 

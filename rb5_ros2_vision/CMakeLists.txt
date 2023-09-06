@@ -1,15 +1,15 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(rb5_ros2_vision)
 
 # Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
+# if(NOT CMAKE_C_STANDARD)
+#   set(CMAKE_C_STANDARD 99)
+# endif()
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+# # Default to C++14
+# if(NOT CMAKE_CXX_STANDARD)
+#   set(CMAKE_CXX_STANDARD 14)
+# endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -52,6 +52,7 @@ find_package(Threads REQUIRED)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/rb5_ros2_vision
   ${GST_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 add_executable(rb_camera_ocv_node
@@ -60,6 +61,7 @@ ament_target_dependencies(rb_camera_ocv_node
   "rclcpp"
   "sensor_msgs"
   "std_msgs"
+  "cv_bridge"
   "OpenCV")
 
 target_link_libraries(rb_camera_ocv_node ${GST_APP_LIBRARIES} ${GST_VIDEO_LIBRARIES})

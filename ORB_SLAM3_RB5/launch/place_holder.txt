@@ -1,1 +1,0 @@
-Place launch files in this folder, they will be installed.
