@@ -21,11 +21,13 @@ tuple<vector<apriltag_pose_t>, vector<int>, cv::Mat> AprilDetection::processImag
   cv::cvtColor(image, image_gray, cv::COLOR_BGR2GRAY);
 
   // TODO: modify C99 designed initializer
-  image_u8_t im = { .width  = image_gray.cols,
-                    .height = image_gray.rows,
-                    .stride = image_gray.cols, 
-                    .buf    = image_gray.data 
-  };
+  // image_u8_t im = { .width  = image_gray.cols,
+  //                   .height = image_gray.rows,
+  //                   .stride = image_gray.cols, 
+  //                   .buf    = image_gray.data 
+  // };
+
+  image_u8_t im = image_u8_t{image_gray.cols, image_gray.rows, image_gray.cols, image_gray.data};
 
 
   zarray_t * detections = apriltag_detector_detect(a_detector, &im);
