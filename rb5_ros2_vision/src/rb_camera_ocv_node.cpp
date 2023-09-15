@@ -154,6 +154,13 @@ void RbCamera::buildGStreamerPipeline(){
   data.appsink       = gst_element_factory_make ("appsink", "sink");
   data.pipeline      = gst_pipeline_new("rb5-camera");
 
+  cout << "pipeline  : " << data.pipeline <<endl;
+  cout << "convert  : " << data.convert <<endl;
+  cout << "source  : " << data.source <<endl;
+  cout << "appsink  : " << data.appsink <<endl;
+  cout << "capsfilterapp  : " << data.capsfilterapp <<endl;
+  cout << "capsfiltersrc  : " << data.capsfiltersrc <<endl;
+
   if (!data.pipeline || !data.convert || !data.source || !data.appsink ||
       !data.capsfiltersrc || !data.capsfilterapp ) {
     g_printerr ("Not all elements could be created.\n");
