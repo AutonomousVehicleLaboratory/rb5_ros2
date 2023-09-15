@@ -33,7 +33,14 @@ install(TARGETS
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
-  scripts/rb5_mpi_control.py
+  scripts/mpi_control.py
+  scripts/key_joy_node.py
+  scripts/key_parser.py
+  scripts/hw1_solution.py
+  scripts/mpi_twist_control_node.py
+  seth/hw1_main_code.py
+  seth/hw1_rb5_controller.py
+  seth/mpi_control.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

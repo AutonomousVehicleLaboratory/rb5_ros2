@@ -45,14 +45,14 @@ def generate_launch_description():
         "image_rectify", default_value=TextSubstitution(text="false")
     )
     camera_parameter_path = DeclareLaunchArgument(
-        "camera_parameter_path", default_value=TextSubstitution(text="/root/dev/ros2ws/src/rb5_ros2/rb5_ros2_vision/config/camera_side.yaml")
+        "camera_parameter_path", default_value=TextSubstitution(text="/home/workspace/rb5_ws/src/rb5_ros2/rb5_ros2_vision/config/camera_side.yaml")
     )
 
     # start another turtlesim_node in the turtlesim2 namespace
     # and use args to set parameters
     rb_camera_main_ocv_node = Node(
             package='rb5_ros2_vision',
-            node_executable='rb_camera_ocv_node',
+            executable='rb_camera_ocv_node',
             name='rb_camera_side_ocv',
             output='screen',
             parameters=[{
