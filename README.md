@@ -5,4 +5,5 @@ In addition you need to clone and build the april tag repo: `https://github.com/
 
 Also the repo for cv_bridge: `https://github.com/ros-perception/vision_opencv/tree/humble`
 
+This is assuming you are using ROS2 humble built from source for the RB5. If this is on a system that natively supports Humble, you can simply install the above packages using apt install.
 
