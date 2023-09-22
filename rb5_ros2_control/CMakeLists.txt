@@ -30,8 +30,16 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+#Install all launch files from our package (assuming they are in a directory called launch)
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+
 ament_python_install_package(${PROJECT_NAME})
 
+# Install python executables
 install(PROGRAMS
   scripts/mpi_control.py
   scripts/key_joy_node.py
@@ -41,6 +49,7 @@ install(PROGRAMS
   seth/hw1_main_code.py
   seth/hw1_rb5_controller.py
   seth/mpi_control.py
+  scripts/hw2_solution.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
